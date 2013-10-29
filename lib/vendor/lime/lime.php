@@ -684,10 +684,23 @@ class lime_output
   {
     if ($colorize)
     {
-      $message = preg_replace('/(?:^|\.)((?:not ok|dubious|errors) *\d*)\b/e', '$this->colorizer->colorize(\'$1\', \'ERROR\')', $message);
-      $message = preg_replace('/(?:^|\.)(ok *\d*)\b/e', '$this->colorizer->colorize(\'$1\', \'INFO\')', $message);
-      $message = preg_replace('/"(.+?)"/e', '$this->colorizer->colorize(\'$1\', \'PARAMETER\')', $message);
-      $message = preg_replace('/(\->|\:\:)?([a-zA-Z0-9_]+?)\(\)/e', '$this->colorizer->colorize(\'$1$2()\', \'PARAMETER\')', $message);
+      $colorizer = $this->colorizer;
+      $colorizeErr = function ($matches) use ($colorizer) {
+        return $colorizer->colorize($matches[0], 'ERROR');
+      };
+      $colorizeInfo = function ($matches) use ($colorizer) {
+        return $colorizer->colorize($matches[0], 'INFO');
+      };
+      $colorizeParam = function ($matches) use ($colorizer) {
+        return $colorizer->colorize($matches[0], 'PARAMETER');
+      };
+      $colorizeParam2 = function ($matches) use ($colorizer) {
+        return $colorizer->colorize($matches[0], 'PARAMETER');
+      };
+      $message = preg_replace_callback('/(?:^|\.)((?:not ok|dubious|errors) *\d*)\b/', $colorizeErr, $message);
+      $message = preg_replace_callback('/(?:^|\.)(ok *\d*)\b/', $colorizeInfo, $message);
+      $message = preg_replace_callback('/"(.+?)"/', $colorizeParam, $message);
+      $message = preg_replace_callback('/(\->|\:\:)?([a-zA-Z0-9_]+?)\(\)/', $colorizeParam2, $message);
     }
 
     echo ($colorizer_parameter ? $this->colorizer->colorize($message, $colorizer_parameter) : $message)."\n";
