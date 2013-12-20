@@ -323,7 +323,19 @@ abstract class sfFormFilterDoctrine extends sfFormFilter
 
   protected function camelize($text)
   {
-    return sfToolkit::pregtr($text, array('#/(.?)#e' => "'::'.strtoupper('\\1')", '/(^|_|-)+(.)/e' => "strtoupper('\\2')"));
+    $text = preg_replace_callback(
+      '#/(.?)#',
+      function(array $matches) {
+        return "::" . strtoupper($matches[0]);
+      },
+      $text);
+    $text = preg_replace_callback(
+      '/(^|_|-)+(.)/',
+      function(array $matches) {
+        return strtoupper($matches[2]);
+      },
+      $text);
+    return $text;
   }
 
   protected function getTable()
